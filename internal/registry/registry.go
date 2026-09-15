@@ -8,6 +8,7 @@ import (
 	"govanish/internal/rules/arch"
 	"govanish/internal/rules/size"
 	"govanish/internal/rules/style"
+	"govanish/internal/rules/tests"
 )
 
 // rules is every rule govanish runs, in registration order.
@@ -71,5 +72,10 @@ func ruleList() []Rule {
 		{ID: "comments-doc-only", Analyzer: style.Comments},
 		{ID: "decl-order", Analyzer: style.DeclOrder},
 		{ID: "import-groups", Analyzer: style.ImportGroups},
+
+		{ID: "test-shape", Analyzer: tests.Shape},
+		{ID: "no-skip", Analyzer: tests.NoSkip},
+		{ID: "test-parallel", Analyzer: tests.Parallel},
+		{ID: "pkg-doc", Analyzer: tests.PkgDoc},
 	}
 }
