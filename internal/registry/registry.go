@@ -85,6 +85,7 @@ func styleRules() []Rule {
 		{ID: "comments-doc-only", Analyzer: style.Comments()},
 		{ID: "decl-order", Analyzer: style.DeclOrder()},
 		{ID: "import-groups", Analyzer: style.ImportGroups()},
+		{ID: "name-length", Analyzer: style.NameLength()},
 	}
 }
 

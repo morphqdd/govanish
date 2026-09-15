@@ -124,7 +124,12 @@ Thresholds appear inline. Rules cut from v1 are listed at the end.
 
 `func-len` 40 body lines; `file-len` 400 lines; `cyclomatic` 8;
 `nesting-depth` 3; `param-count` 4; `return-count` 3;
-`struct-fields` 10.
+`struct-fields` 10; `file-complexity` 40.
+
+`file-complexity` was added after the spec was written. It sums the McCabe
+complexity of every function in a file. Every other size limit is
+per-function, so a file of thirty individually simple functions passes
+them all; this catches that. It found one on its first run.
 
 ### errs
 
@@ -185,8 +190,14 @@ Thresholds appear inline. Rules cut from v1 are listed at the end.
 - `no-bool-param` — boolean parameters are banned.
 - `keyed-literals` — composite literals name their fields.
 - `min-export` — an exported identifier never used outside its own
-  package is an error. Requires whole-program analysis via
-  `analysis.Fact` and topological package ordering in the runner.
+  package is an error.
+
+  **Implemented differently from this spec.** Facts flow from a package to
+  its importers, never the reverse, so no analyzer can ask "does anyone
+  use this?". It is a whole-program check in `internal/wholeprogram`,
+  running over the loaded package set after the analyzers finish. A type
+  named only in the signature of a used export, or of that export's
+  methods, counts as used.
 
 ### Cut from v1
 

@@ -92,7 +92,7 @@ func TestEveryRuleIsRegistered(t *testing.T) {
 		"cyclomatic", "decl-order", "defer-unlock", "errcheck", "error-shape",
 		"errors-is", "exported-doc", "file-complexity", "file-len", "func-len",
 		"go-needs-owner", "import-groups", "initialisms", "keyed-literals",
-		"line-length", "nesting-depth", "no-any", "no-bool-param",
+		"line-length", "name-length", "nesting-depth", "no-any", "no-bool-param",
 		"no-bare-prim", "no-else-after-return", "no-empty-err-branch",
 		"no-globals", "no-iface-return", "no-init",
 		"no-naked-return", "no-panic", "no-shadow", "no-skip",

@@ -27,3 +27,5 @@ func TestDeclOrderBad(t *testing.T) { run(t, style.DeclOrder(), "declorderbad") 
 
 func TestImportGroups(t *testing.T) { run(t, style.ImportGroups(), "importgroups") }
 func TestImportBad(t *testing.T)    { run(t, style.ImportGroups(), "importbad") }
+
+func TestNameLength(t *testing.T) { run(t, style.NameLength(), "namelength") }
