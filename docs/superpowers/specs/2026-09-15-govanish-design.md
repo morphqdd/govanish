@@ -80,9 +80,19 @@ Three invariants hold the system together:
 3. **Every AST-walking rule lists `inspect.Analyzer` in `Requires`,** so
    each package is traversed once rather than once per rule.
 
-The registry is a flat `[]*analysis.Analyzer`. Execution order is
-irrelevant to every rule except `min-export`; diagnostics are sorted at
-print time.
+`analysis.Validate` requires `Analyzer.Name` to be a valid Go identifier,
+so the hyphenated identifiers used in output (`func-len`) cannot be
+analyzer names (`funclen`). The registry pairs the two:
+
+```go
+type Rule struct {
+    ID       string             // printed: "func-len"
+    Analyzer *analysis.Analyzer // Name: "funclen"
+}
+```
+
+The registry is a flat `[]Rule`. Execution order is irrelevant to every
+rule except `min-export`; diagnostics are sorted at print time.
 
 ## Rule set
 
@@ -203,12 +213,15 @@ Three flags, none affecting which rules run: `-format text|json`,
    given patterns. Load errors (syntax errors, missing dependencies)
    are reported and exit 2. Linting unparseable code produces
    meaningless results.
-2. Packages are ordered topologically, because `min-export` emits facts
-   its importers consume. No other rule depends on order.
-3. Per package: `inspect.Analyzer` runs once, then every rule runs
-   against that shared inspector. Packages are processed concurrently
-   up to `GOMAXPROCS`; rules within a package run sequentially, so
-   diagnostics accumulate without locking.
+2. The loaded packages and the registry's analyzers are handed to
+   `checker.Analyze` from `golang.org/x/tools/go/analysis/checker`. That
+   driver orders packages topologically (required by `min-export`, which
+   emits facts its importers consume), propagates facts across package
+   boundaries, runs `inspect.Analyzer` once per package for every rule
+   that requires it, and parallelizes the action graph. Reimplementing
+   this by hand would be strictly worse.
+3. The resulting action graph is walked, and the diagnostics of every
+   root action are converted into findings.
 4. Diagnostics are collected, sorted by file, line, column, then rule
    id, printed, and the exit code is set.
 
