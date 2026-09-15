@@ -22,6 +22,16 @@ const (
 // version is overridden at build time with -ldflags.
 var version = "dev"
 
+// options is everything one lint run needs. It exists because govanish
+// forbids functions of five parameters, and it was right to.
+type options struct {
+	format   string
+	patterns []string
+	dir      string
+	out      io.Writer
+	errOut   io.Writer
+}
+
 func main() {
 	os.Exit(run(os.Args[1:], "", os.Stdout, os.Stderr))
 }
@@ -50,16 +60,6 @@ func run(args []string, dir string, out, errOut io.Writer) int {
 		out:      out,
 		errOut:   errOut,
 	})
-}
-
-// options is everything one lint run needs. It exists because govanish
-// forbids functions of five parameters, and it was right to.
-type options struct {
-	format   string
-	patterns []string
-	dir      string
-	out      io.Writer
-	errOut   io.Writer
 }
 
 func lint(opts options) int {

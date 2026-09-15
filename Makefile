@@ -1,6 +1,13 @@
-.PHONY: build test lint all
+.PHONY: build test lint fmt all
 
-all: test lint build
+# testdata is excluded everywhere: fixtures are deliberately malformed,
+# and gofmt would repair the very violations they exist to prove.
+GOFILES = $(shell find cmd internal -name '*.go' -not -path '*/testdata/*') selflint_test.go
+
+all: fmt test lint build
+
+fmt:
+	@test -z "$$(gofmt -l $(GOFILES))" || { echo "unformatted:"; gofmt -l $(GOFILES); exit 1; }
 
 build:
 	go build -o bin/govanish ./cmd/govanish

@@ -4,11 +4,16 @@ import (
 	"strings"
 	"testing"
 
+	"govanish/internal/report"
 	"govanish/internal/runner"
 )
 
 const fixtureDir = "testdata/fixture"
 
+// TestRunReportsViolations asserts on the rule under test rather than on
+// the total number of findings, which grows with the rule set. Requiring
+// exactly one occurrence also proves deduplication: the fixture package
+// has a test file, so go/packages loads it twice.
 func TestRunReportsViolations(t *testing.T) {
 	t.Parallel()
 
@@ -17,20 +22,30 @@ func TestRunReportsViolations(t *testing.T) {
 		t.Fatalf("run: %v", err)
 	}
 
-	if len(findings) != 1 {
-		t.Fatalf("got %d findings, want 1: %+v", len(findings), findings)
+	matched := findingsOf(findings, "no-init")
+	if len(matched) != 1 {
+		t.Fatalf("got %d no-init findings, want 1: %+v", len(matched), matched)
 	}
 
-	finding := findings[0]
-	if finding.Rule != "no-init" {
-		t.Errorf("rule = %q, want %q", finding.Rule, "no-init")
-	}
+	finding := matched[0]
 	if !strings.HasSuffix(finding.File, "bad/bad.go") {
 		t.Errorf("file = %q, want it to end with bad/bad.go", finding.File)
 	}
 	if finding.Line != 5 {
 		t.Errorf("line = %d, want 5", finding.Line)
 	}
+}
+
+func findingsOf(findings []report.Finding, rule string) []report.Finding {
+	var matched []report.Finding
+
+	for _, finding := range findings {
+		if finding.Rule == rule {
+			matched = append(matched, finding)
+		}
+	}
+
+	return matched
 }
 
 func TestRunSkipsGeneratedFiles(t *testing.T) {

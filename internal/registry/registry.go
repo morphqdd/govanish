@@ -7,7 +7,11 @@ import (
 
 	"govanish/internal/rules/arch"
 	"govanish/internal/rules/size"
+	"govanish/internal/rules/style"
 )
+
+// rules is every rule govanish runs, in registration order.
+var rules = ruleList()
 
 // Rule pairs an analyzer with the identifier govanish prints for it.
 // The two differ because analysis.Validate requires analyzer names to be
@@ -15,19 +19,6 @@ import (
 type Rule struct {
 	ID       string
 	Analyzer *analysis.Analyzer
-}
-
-var rules = []Rule{
-	{ID: "no-init", Analyzer: arch.NoInit},
-
-	{ID: "func-len", Analyzer: size.FuncLen},
-	{ID: "file-len", Analyzer: size.FileLen},
-	{ID: "line-length", Analyzer: size.LineLength},
-	{ID: "cyclomatic", Analyzer: size.Cyclo},
-	{ID: "nesting-depth", Analyzer: size.Nesting},
-	{ID: "param-count", Analyzer: size.ParamCount},
-	{ID: "return-count", Analyzer: size.ReturnCount},
-	{ID: "struct-fields", Analyzer: size.StructFields},
 }
 
 // All returns every registered rule.
@@ -58,4 +49,27 @@ func IDOf(target *analysis.Analyzer) string {
 	}
 
 	return target.Name
+}
+
+func ruleList() []Rule {
+	return []Rule{
+		{ID: "no-init", Analyzer: arch.NoInit},
+
+		{ID: "func-len", Analyzer: size.FuncLen},
+		{ID: "file-len", Analyzer: size.FileLen},
+		{ID: "line-length", Analyzer: size.LineLength},
+		{ID: "cyclomatic", Analyzer: size.Cyclo},
+		{ID: "nesting-depth", Analyzer: size.Nesting},
+		{ID: "param-count", Analyzer: size.ParamCount},
+		{ID: "return-count", Analyzer: size.ReturnCount},
+		{ID: "struct-fields", Analyzer: size.StructFields},
+
+		{ID: "no-else-after-return", Analyzer: style.NoElse},
+		{ID: "no-naked-return", Analyzer: style.NoNakedReturn},
+		{ID: "no-underscore-names", Analyzer: style.Underscores},
+		{ID: "initialisms", Analyzer: style.Initialisms},
+		{ID: "comments-doc-only", Analyzer: style.Comments},
+		{ID: "decl-order", Analyzer: style.DeclOrder},
+		{ID: "import-groups", Analyzer: style.ImportGroups},
+	}
 }
