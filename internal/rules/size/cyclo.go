@@ -8,7 +8,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 
-	"govanish/internal/astutil"
+	"github.com/morphqdd/govanish/internal/astutil"
 )
 
 // maxComplexity is the most independent paths a function may contain.

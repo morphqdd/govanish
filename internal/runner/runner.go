@@ -12,9 +12,9 @@ import (
 	"golang.org/x/tools/go/analysis/checker"
 	"golang.org/x/tools/go/packages"
 
-	"govanish/internal/registry"
-	"govanish/internal/report"
-	"govanish/internal/wholeprogram"
+	"github.com/morphqdd/govanish/internal/registry"
+	"github.com/morphqdd/govanish/internal/report"
+	"github.com/morphqdd/govanish/internal/wholeprogram"
 )
 
 const loadMode = packages.NeedName |

@@ -9,8 +9,8 @@ import (
 	"io"
 	"os"
 
-	"govanish/internal/report"
-	"govanish/internal/runner"
+	"github.com/morphqdd/govanish/internal/report"
+	"github.com/morphqdd/govanish/internal/runner"
 )
 
 const (

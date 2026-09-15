@@ -8,7 +8,7 @@ import (
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
 
-	"govanish/internal/astutil"
+	"github.com/morphqdd/govanish/internal/astutil"
 )
 
 // NoShadow reports a variable that hides another of the same name from an

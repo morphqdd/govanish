@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/tools/go/packages"
 
-	"govanish/internal/report"
+	"github.com/morphqdd/govanish/internal/report"
 )
 
 // minExportID is the rule identifier printed with these findings.

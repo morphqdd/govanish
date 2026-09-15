@@ -7,7 +7,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 
-	"govanish/internal/astutil"
+	"github.com/morphqdd/govanish/internal/astutil"
 )
 
 // maxParams is the most parameters a function may accept. A function that

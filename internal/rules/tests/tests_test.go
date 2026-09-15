@@ -6,7 +6,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/analysistest"
 
-	"govanish/internal/rules/tests"
+	"github.com/morphqdd/govanish/internal/rules/tests"
 )
 
 func run(t *testing.T, analyzer *analysis.Analyzer, pkg string) {

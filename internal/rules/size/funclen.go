@@ -7,7 +7,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 
-	"govanish/internal/astutil"
+	"github.com/morphqdd/govanish/internal/astutil"
 )
 
 // maxFuncLines is the most lines a function body may contain, counting

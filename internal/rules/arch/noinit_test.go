@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/tools/go/analysis/analysistest"
 
-	"govanish/internal/rules/arch"
+	"github.com/morphqdd/govanish/internal/rules/arch"
 )
 
 func TestNoInit(t *testing.T) {

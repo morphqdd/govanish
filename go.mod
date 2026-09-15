@@ -1,4 +1,4 @@
-module govanish
+module github.com/morphqdd/govanish
 
 go 1.26.3
 

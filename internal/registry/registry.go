@@ -5,13 +5,13 @@ package registry
 import (
 	"golang.org/x/tools/go/analysis"
 
-	"govanish/internal/rules/api"
-	"govanish/internal/rules/arch"
-	"govanish/internal/rules/conc"
-	"govanish/internal/rules/errs"
-	"govanish/internal/rules/size"
-	"govanish/internal/rules/style"
-	"govanish/internal/rules/tests"
+	"github.com/morphqdd/govanish/internal/rules/api"
+	"github.com/morphqdd/govanish/internal/rules/arch"
+	"github.com/morphqdd/govanish/internal/rules/conc"
+	"github.com/morphqdd/govanish/internal/rules/errs"
+	"github.com/morphqdd/govanish/internal/rules/size"
+	"github.com/morphqdd/govanish/internal/rules/style"
+	"github.com/morphqdd/govanish/internal/rules/tests"
 )
 
 // Rule pairs an analyzer with the identifier govanish prints for it.

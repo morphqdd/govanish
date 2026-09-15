@@ -6,7 +6,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 
-	"govanish/internal/astutil"
+	"github.com/morphqdd/govanish/internal/astutil"
 )
 
 // ErrCheck reports error results that are neither examined nor returned.

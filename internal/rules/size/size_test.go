@@ -6,7 +6,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/analysistest"
 
-	"govanish/internal/rules/size"
+	"github.com/morphqdd/govanish/internal/rules/size"
 )
 
 func run(t *testing.T, analyzer *analysis.Analyzer, pkg string) {

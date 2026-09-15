@@ -6,7 +6,7 @@ import (
 
 	"golang.org/x/tools/go/analysis"
 
-	"govanish/internal/registry"
+	"github.com/morphqdd/govanish/internal/registry"
 )
 
 func TestAllRulesAreValid(t *testing.T) {

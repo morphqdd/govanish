@@ -6,8 +6,8 @@ import (
 
 	"golang.org/x/tools/go/packages"
 
-	"govanish/internal/report"
-	"govanish/internal/wholeprogram"
+	"github.com/morphqdd/govanish/internal/report"
+	"github.com/morphqdd/govanish/internal/wholeprogram"
 )
 
 func load(t *testing.T) []*packages.Package {

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"govanish/internal/runner"
+	"github.com/morphqdd/govanish/internal/runner"
 )
 
 const fixtureDir = runner.Dir("../../internal/runner/testdata/fixture")

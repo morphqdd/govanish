@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
-	"govanish/internal/report"
-	"govanish/internal/runner"
+	"github.com/morphqdd/govanish/internal/report"
+	"github.com/morphqdd/govanish/internal/runner"
 )
 
 // TestSelfLint holds govanish to its own rules. It is expected to fail

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"govanish/internal/report"
+	"github.com/morphqdd/govanish/internal/report"
 )
 
 func unsorted() []report.Finding {
