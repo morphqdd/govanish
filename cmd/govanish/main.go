@@ -43,27 +43,42 @@ func run(args []string, dir string, out, errOut io.Writer) int {
 		return exitClean
 	}
 
-	render, err := renderer(*format)
+	return lint(options{
+		format:   *format,
+		patterns: patternsOf(flags),
+		dir:      dir,
+		out:      out,
+		errOut:   errOut,
+	})
+}
+
+// options is everything one lint run needs. It exists because govanish
+// forbids functions of five parameters, and it was right to.
+type options struct {
+	format   string
+	patterns []string
+	dir      string
+	out      io.Writer
+	errOut   io.Writer
+}
+
+func lint(opts options) int {
+	render, err := renderer(opts.format)
 	if err != nil {
-		fmt.Fprintf(errOut, "govanish: %v\n", err)
+		fmt.Fprintf(opts.errOut, "govanish: %v\n", err)
 
 		return exitFailure
 	}
 
-	patterns := flags.Args()
-	if len(patterns) == 0 {
-		patterns = []string{"./..."}
-	}
-
-	findings, err := runner.Run(dir, patterns)
+	findings, err := runner.Run(opts.dir, opts.patterns)
 	if err != nil {
-		fmt.Fprintf(errOut, "govanish: %v\n", err)
+		fmt.Fprintf(opts.errOut, "govanish: %v\n", err)
 
 		return exitFailure
 	}
 
-	if err := render(out, findings); err != nil {
-		fmt.Fprintf(errOut, "govanish: %v\n", err)
+	if err := render(opts.out, findings); err != nil {
+		fmt.Fprintf(opts.errOut, "govanish: %v\n", err)
 
 		return exitFailure
 	}
@@ -73,6 +88,17 @@ func run(args []string, dir string, out, errOut io.Writer) int {
 	}
 
 	return exitClean
+}
+
+// patternsOf returns the package patterns given on the command line, or
+// the whole module when none were.
+func patternsOf(flags *flag.FlagSet) []string {
+	patterns := flags.Args()
+	if len(patterns) == 0 {
+		return []string{"./..."}
+	}
+
+	return patterns
 }
 
 func renderer(format string) (func(io.Writer, []report.Finding) error, error) {

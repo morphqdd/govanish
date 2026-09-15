@@ -49,7 +49,7 @@ func Run(dir string, patterns []string) ([]report.Finding, error) {
 
 	report.Sort(findings)
 
-	return findings, nil
+	return deduplicate(findings), nil
 }
 
 func load(dir string, patterns []string) ([]*packages.Package, error) {
@@ -69,6 +69,25 @@ func load(dir string, patterns []string) ([]*packages.Package, error) {
 	}
 
 	return pkgs, nil
+}
+
+// deduplicate drops findings that repeat. go/packages loads a package
+// once plainly and once more with its test files, so any finding in a
+// non-test file of a tested package is produced twice.
+func deduplicate(findings []report.Finding) []report.Finding {
+	seen := make(map[report.Finding]bool, len(findings))
+	unique := make([]report.Finding, 0, len(findings))
+
+	for _, finding := range findings {
+		if seen[finding] {
+			continue
+		}
+
+		seen[finding] = true
+		unique = append(unique, finding)
+	}
+
+	return unique
 }
 
 func collect(graph *checker.Graph) ([]report.Finding, error) {
@@ -99,7 +118,11 @@ func collect(graph *checker.Graph) ([]report.Finding, error) {
 	return findings, nil
 }
 
-func finding(action *checker.Action, diagnostic analysis.Diagnostic, position token.Position) report.Finding {
+func finding(
+	action *checker.Action,
+	diagnostic analysis.Diagnostic,
+	position token.Position,
+) report.Finding {
 	end := position
 	if diagnostic.End.IsValid() {
 		end = action.Package.Fset.Position(diagnostic.End)

@@ -6,6 +6,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 
 	"govanish/internal/rules/arch"
+	"govanish/internal/rules/size"
 )
 
 // Rule pairs an analyzer with the identifier govanish prints for it.
@@ -18,6 +19,15 @@ type Rule struct {
 
 var rules = []Rule{
 	{ID: "no-init", Analyzer: arch.NoInit},
+
+	{ID: "func-len", Analyzer: size.FuncLen},
+	{ID: "file-len", Analyzer: size.FileLen},
+	{ID: "line-length", Analyzer: size.LineLength},
+	{ID: "cyclomatic", Analyzer: size.Cyclo},
+	{ID: "nesting-depth", Analyzer: size.Nesting},
+	{ID: "param-count", Analyzer: size.ParamCount},
+	{ID: "return-count", Analyzer: size.ReturnCount},
+	{ID: "struct-fields", Analyzer: size.StructFields},
 }
 
 // All returns every registered rule.

@@ -37,7 +37,8 @@ func runNoInit(pass *analysis.Pass) (any, error) {
 			return
 		}
 
-		pass.Reportf(decl.Pos(), "func init is banned; do the work in an explicit constructor called from main")
+		pass.Reportf(decl.Pos(),
+			"func init is banned; do the work in an explicit constructor")
 	})
 
 	return nil, nil
