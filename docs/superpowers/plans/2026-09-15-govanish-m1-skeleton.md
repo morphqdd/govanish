@@ -791,6 +791,7 @@ const loadMode = packages.NeedName |
 	packages.NeedSyntax |
 	packages.NeedTypes |
 	packages.NeedTypesInfo |
+	packages.NeedTypesSizes |
 	packages.NeedDeps |
 	packages.NeedImports |
 	packages.NeedModule

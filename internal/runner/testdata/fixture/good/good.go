@@ -1,0 +1,5 @@
+package good
+
+func Answer() int {
+	return 42
+}
