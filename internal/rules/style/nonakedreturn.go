@@ -12,11 +12,13 @@ import (
 // NoNakedReturn reports bare returns in functions with named results.
 // Function literals are skipped: their results are checked against their
 // own signature, not the enclosing one.
-var NoNakedReturn = &analysis.Analyzer{
-	Name:     "nonakedreturn",
-	Doc:      "functions with named results must return their values explicitly",
-	Requires: []*analysis.Analyzer{inspect.Analyzer},
-	Run:      runNoNakedReturn,
+func NoNakedReturn() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name:     "nonakedreturn",
+		Doc:      "functions with named results must return their values explicitly",
+		Requires: []*analysis.Analyzer{inspect.Analyzer},
+		Run:      runNoNakedReturn,
+	}
 }
 
 func runNoNakedReturn(pass *analysis.Pass) (any, error) {

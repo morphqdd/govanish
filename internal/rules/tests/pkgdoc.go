@@ -9,10 +9,12 @@ import (
 // PkgDoc reports a package with no package comment anywhere in it. An
 // external test package is exempt: it documents nothing a consumer can
 // import.
-var PkgDoc = &analysis.Analyzer{
-	Name: "pkgdoc",
-	Doc:  "every package must have a package comment",
-	Run:  runPkgDoc,
+func PkgDoc() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name: "pkgdoc",
+		Doc:  "every package must have a package comment",
+		Run:  runPkgDoc,
+	}
 }
 
 func runPkgDoc(pass *analysis.Pass) (any, error) {

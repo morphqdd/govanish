@@ -9,20 +9,24 @@ import (
 	"govanish/internal/astutil"
 )
 
-// skipMethods are the testing methods that abandon a test at runtime.
-var skipMethods = map[string]bool{
-	"Skip":    true,
-	"Skipf":   true,
-	"SkipNow": true,
-}
-
 // NoSkip reports tests that skip themselves. A test that is skipped is a
 // test that does not exist, but still looks like coverage.
-var NoSkip = &analysis.Analyzer{
-	Name:     "noskip",
-	Doc:      "tests may not skip themselves; delete the test or fix it",
-	Requires: []*analysis.Analyzer{inspect.Analyzer},
-	Run:      runNoSkip,
+func NoSkip() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name:     "noskip",
+		Doc:      "tests may not skip themselves; delete the test or fix it",
+		Requires: []*analysis.Analyzer{inspect.Analyzer},
+		Run:      runNoSkip,
+	}
+}
+
+// skipMethods() are the testing methods that abandon a test at runtime.
+func skipMethods() map[string]bool {
+	return map[string]bool{
+		"Skip":    true,
+		"Skipf":   true,
+		"SkipNow": true,
+	}
 }
 
 func runNoSkip(pass *analysis.Pass) (any, error) {
@@ -38,7 +42,7 @@ func runNoSkip(pass *analysis.Pass) (any, error) {
 		}
 
 		selector, ok := call.Fun.(*ast.SelectorExpr)
-		if !ok || !skipMethods[selector.Sel.Name] {
+		if !ok || !skipMethods()[selector.Sel.Name] {
 			return
 		}
 

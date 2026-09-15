@@ -17,19 +17,23 @@ const (
 	groupLocal
 )
 
-// groupNames names a group for a diagnostic.
-var groupNames = map[int]string{
-	groupStdlib:   "standard library",
-	groupExternal: "external",
-	groupLocal:    "local",
-}
-
 // ImportGroups reports imports that are not arranged as exactly three
 // ordered, sorted groups: standard library, external, then local.
-var ImportGroups = &analysis.Analyzer{
-	Name: "importgroups",
-	Doc:  "imports must form sorted groups: standard library, external, local",
-	Run:  runImportGroups,
+func ImportGroups() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name: "importgroups",
+		Doc:  "imports must form sorted groups: standard library, external, local",
+		Run:  runImportGroups,
+	}
+}
+
+// groupNames() names a group for a diagnostic.
+func groupNames() map[int]string {
+	return map[int]string{
+		groupStdlib:   "standard library",
+		groupExternal: "external",
+		groupLocal:    "local",
+	}
 }
 
 func runImportGroups(pass *analysis.Pass) (any, error) {
@@ -137,7 +141,7 @@ func checkGroup(pass *analysis.Pass, group []*ast.ImportSpec, prefix string) int
 			kind = groupOf(path, prefix)
 		} else if got := groupOf(path, prefix); got != kind {
 			pass.Reportf(spec.Pos(), "import %q belongs in the %s group, not the %s group",
-				path, groupNames[got], groupNames[kind])
+				path, groupNames()[got], groupNames()[kind])
 		}
 
 		if previousPath != "" && path < previousPath {

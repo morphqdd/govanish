@@ -9,10 +9,12 @@ import (
 
 // Shape reports test functions that do not follow Go's test conventions:
 // a capitalized name, a single *testing.T, and subtests for table cases.
-var Shape = &analysis.Analyzer{
-	Name: "testshape",
-	Doc:  "tests must be named TestXxx and use t.Run for table cases",
-	Run:  runShape,
+func Shape() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name: "testshape",
+		Doc:  "tests must be named TestXxx and use t.Run for table cases",
+		Run:  runShape,
+	}
 }
 
 func runShape(pass *analysis.Pass) (any, error) {

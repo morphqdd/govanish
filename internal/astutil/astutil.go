@@ -6,6 +6,7 @@ package astutil
 import (
 	"errors"
 	"go/ast"
+	"go/types"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
@@ -15,13 +16,15 @@ import (
 // ErrMissingInspector reports that the driver did not supply the shared
 // inspector, which means the analyzer ran without declaring inspect in
 // its Requires.
-var ErrMissingInspector = errors.New("inspect analyzer result missing")
+func ErrMissingInspector() error {
+	return errors.New("inspect analyzer result missing")
+}
 
 // Inspector returns the shared inspector for the package under analysis.
 func Inspector(pass *analysis.Pass) (*inspector.Inspector, error) {
 	insp, ok := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	if !ok {
-		return nil, ErrMissingInspector
+		return nil, ErrMissingInspector()
 	}
 
 	return insp, nil
@@ -35,4 +38,40 @@ func Describe(decl *ast.FuncDecl) string {
 	}
 
 	return "method " + decl.Name.Name
+}
+
+// ErrorType is the predeclared error interface.
+func ErrorType() types.Type {
+	return types.Universe.Lookup("error").Type()
+}
+
+// IsError reports whether a type is exactly the predeclared error
+// interface, rather than merely implementing it.
+func IsError(typ types.Type) bool {
+	if typ == nil {
+		return false
+	}
+
+	return types.Identical(typ, ErrorType())
+}
+
+// ResultTypes returns the result types of whatever a call expression
+// evaluates to, flattening a tuple into its members.
+func ResultTypes(info *types.Info, call *ast.CallExpr) []types.Type {
+	typ := info.TypeOf(call)
+	if typ == nil {
+		return nil
+	}
+
+	tuple, ok := typ.(*types.Tuple)
+	if !ok {
+		return []types.Type{typ}
+	}
+
+	results := make([]types.Type, 0, tuple.Len())
+	for index := range tuple.Len() {
+		results = append(results, tuple.At(index).Type())
+	}
+
+	return results
 }

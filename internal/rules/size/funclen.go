@@ -15,11 +15,13 @@ import (
 const maxFuncLines = 40
 
 // FuncLen reports functions whose body is too long to read at once.
-var FuncLen = &analysis.Analyzer{
-	Name:     "funclen",
-	Doc:      fmt.Sprintf("function bodies may not exceed %d lines", maxFuncLines),
-	Requires: []*analysis.Analyzer{inspect.Analyzer},
-	Run:      runFuncLen,
+func FuncLen() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name:     "funclen",
+		Doc:      fmt.Sprintf("function bodies may not exceed %d lines", maxFuncLines),
+		Requires: []*analysis.Analyzer{inspect.Analyzer},
+		Run:      runFuncLen,
+	}
 }
 
 func runFuncLen(pass *analysis.Pass) (any, error) {

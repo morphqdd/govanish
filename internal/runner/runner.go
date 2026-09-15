@@ -27,7 +27,9 @@ const loadMode = packages.NeedName |
 	packages.NeedModule
 
 // ErrNoPackages reports that the given patterns matched nothing.
-var ErrNoPackages = errors.New("no packages matched the given patterns")
+func ErrNoPackages() error {
+	return errors.New("no packages matched the given patterns")
+}
 
 // Run lints the packages matching patterns, resolved relative to dir, and
 // returns their findings in printing order.
@@ -37,12 +39,14 @@ func Run(dir string, patterns []string) ([]report.Finding, error) {
 		return nil, err
 	}
 
-	graph, err := checker.Analyze(registry.Analyzers(), pkgs, nil)
+	set := registry.New()
+
+	graph, err := checker.Analyze(set.Analyzers(), pkgs, nil)
 	if err != nil {
 		return nil, fmt.Errorf("analyze: %w", err)
 	}
 
-	findings, err := collect(graph)
+	findings, err := collect(set, graph)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +65,7 @@ func load(dir string, patterns []string) ([]*packages.Package, error) {
 	}
 
 	if len(pkgs) == 0 {
-		return nil, ErrNoPackages
+		return nil, ErrNoPackages()
 	}
 
 	if packages.PrintErrors(pkgs) > 0 {
@@ -90,7 +94,7 @@ func deduplicate(findings []report.Finding) []report.Finding {
 	return unique
 }
 
-func collect(graph *checker.Graph) ([]report.Finding, error) {
+func collect(set registry.Set, graph *checker.Graph) ([]report.Finding, error) {
 	findings := make([]report.Finding, 0)
 
 	for action := range graph.All() {
@@ -100,7 +104,7 @@ func collect(graph *checker.Graph) ([]report.Finding, error) {
 
 		if action.Err != nil {
 			return nil, fmt.Errorf("rule %s on %s: %w",
-				registry.IDOf(action.Analyzer), action.Package.PkgPath, action.Err)
+				set.IDOf(action.Analyzer), action.Package.PkgPath, action.Err)
 		}
 
 		generated := generatedFiles(action.Package)
@@ -111,7 +115,7 @@ func collect(graph *checker.Graph) ([]report.Finding, error) {
 				continue
 			}
 
-			findings = append(findings, finding(action, diagnostic, position))
+			findings = append(findings, finding(set, action, diagnostic, position))
 		}
 	}
 
@@ -119,6 +123,7 @@ func collect(graph *checker.Graph) ([]report.Finding, error) {
 }
 
 func finding(
+	set registry.Set,
 	action *checker.Action,
 	diagnostic analysis.Diagnostic,
 	position token.Position,
@@ -134,7 +139,7 @@ func finding(
 		Col:     position.Column,
 		EndLine: end.Line,
 		EndCol:  end.Column,
-		Rule:    registry.IDOf(action.Analyzer),
+		Rule:    set.IDOf(action.Analyzer),
 		Message: diagnostic.Message,
 	}
 }

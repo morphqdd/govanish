@@ -19,8 +19,9 @@ const (
 	exitFailure  = 2
 )
 
-// version is overridden at build time with -ldflags.
-var version = "dev"
+// version names this build. It is a constant because govanish bans
+// package-level variables, which rules out the -ldflags -X trick.
+const version = "dev"
 
 // options is everything one lint run needs. It exists because govanish
 // forbids functions of five parameters, and it was right to.
@@ -48,7 +49,9 @@ func run(args []string, dir string, out, errOut io.Writer) int {
 	}
 
 	if *showVersion {
-		fmt.Fprintf(out, "govanish %s\n", version)
+		if _, err := fmt.Fprintf(out, "govanish %s\n", version); err != nil {
+			return exitFailure
+		}
 
 		return exitClean
 	}
@@ -65,22 +68,16 @@ func run(args []string, dir string, out, errOut io.Writer) int {
 func lint(opts options) int {
 	render, err := renderer(opts.format)
 	if err != nil {
-		fmt.Fprintf(opts.errOut, "govanish: %v\n", err)
-
-		return exitFailure
+		return fail(opts.errOut, err)
 	}
 
 	findings, err := runner.Run(opts.dir, opts.patterns)
 	if err != nil {
-		fmt.Fprintf(opts.errOut, "govanish: %v\n", err)
-
-		return exitFailure
+		return fail(opts.errOut, err)
 	}
 
 	if err := render(opts.out, findings); err != nil {
-		fmt.Fprintf(opts.errOut, "govanish: %v\n", err)
-
-		return exitFailure
+		return fail(opts.errOut, err)
 	}
 
 	if len(findings) > 0 {
@@ -99,6 +96,16 @@ func patternsOf(flags *flag.FlagSet) []string {
 	}
 
 	return patterns
+}
+
+// fail reports err and yields the failure exit code. A failure to write
+// the message itself changes nothing: the command is already failing.
+func fail(errOut io.Writer, err error) int {
+	if _, writeErr := fmt.Fprintf(errOut, "govanish: %v\n", err); writeErr != nil {
+		return exitFailure
+	}
+
+	return exitFailure
 }
 
 func renderer(format string) (func(io.Writer, []report.Finding) error, error) {

@@ -15,11 +15,13 @@ const maxStructFields = 10
 
 // StructFields reports structs that have accumulated too many fields to
 // have a single responsibility.
-var StructFields = &analysis.Analyzer{
-	Name:     "structfields",
-	Doc:      fmt.Sprintf("structs may not declare more than %d fields", maxStructFields),
-	Requires: []*analysis.Analyzer{inspect.Analyzer},
-	Run:      runStructFields,
+func StructFields() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name:     "structfields",
+		Doc:      fmt.Sprintf("structs may not declare more than %d fields", maxStructFields),
+		Requires: []*analysis.Analyzer{inspect.Analyzer},
+		Run:      runStructFields,
+	}
 }
 
 func runStructFields(pass *analysis.Pass) (any, error) {

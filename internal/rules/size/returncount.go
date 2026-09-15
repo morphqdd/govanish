@@ -15,11 +15,13 @@ const maxResults = 3
 
 // ReturnCount reports functions returning more values than a caller can
 // keep straight.
-var ReturnCount = &analysis.Analyzer{
-	Name:     "returncount",
-	Doc:      fmt.Sprintf("functions may not return more than %d values", maxResults),
-	Requires: []*analysis.Analyzer{inspect.Analyzer},
-	Run:      runReturnCount,
+func ReturnCount() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name:     "returncount",
+		Doc:      fmt.Sprintf("functions may not return more than %d values", maxResults),
+		Requires: []*analysis.Analyzer{inspect.Analyzer},
+		Run:      runReturnCount,
+	}
 }
 
 func runReturnCount(pass *analysis.Pass) (any, error) {

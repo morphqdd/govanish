@@ -13,10 +13,12 @@ import (
 const maxLineColumns = 100
 
 // LineLength reports source lines too wide to read in a split window.
-var LineLength = &analysis.Analyzer{
-	Name: "linelength",
-	Doc:  fmt.Sprintf("source lines may not exceed %d columns", maxLineColumns),
-	Run:  runLineLength,
+func LineLength() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name: "linelength",
+		Doc:  fmt.Sprintf("source lines may not exceed %d columns", maxLineColumns),
+		Run:  runLineLength,
+	}
 }
 
 func runLineLength(pass *analysis.Pass) (any, error) {

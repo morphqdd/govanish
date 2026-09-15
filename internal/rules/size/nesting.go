@@ -14,11 +14,13 @@ import (
 const maxNesting = 3
 
 // Nesting reports blocks buried too deep to follow.
-var Nesting = &analysis.Analyzer{
-	Name:     "nesting",
-	Doc:      fmt.Sprintf("blocks may not nest deeper than %d levels", maxNesting),
-	Requires: []*analysis.Analyzer{inspect.Analyzer},
-	Run:      runNesting,
+func Nesting() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name:     "nesting",
+		Doc:      fmt.Sprintf("blocks may not nest deeper than %d levels", maxNesting),
+		Requires: []*analysis.Analyzer{inspect.Analyzer},
+		Run:      runNesting,
+	}
 }
 
 func runNesting(pass *analysis.Pass) (any, error) {

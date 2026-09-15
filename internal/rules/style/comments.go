@@ -7,17 +7,21 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-// bannedMarkers are the comment markers that record work left undone.
-// Undone work belongs in an issue tracker, where it is visible.
-var bannedMarkers = []string{"TODO", "FIXME", "XXX", "HACK"}
-
 // Comments reports every comment that is not a doc comment on a
 // declaration. A comment explaining code inside a function is a sign the
 // code needs a name, not a note.
-var Comments = &analysis.Analyzer{
-	Name: "comments",
-	Doc:  "comments are allowed only as doc comments on declarations",
-	Run:  runComments,
+func Comments() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name: "comments",
+		Doc:  "comments are allowed only as doc comments on declarations",
+		Run:  runComments,
+	}
+}
+
+// bannedMarkers are the comment markers that record work left undone.
+// Undone work belongs in an issue tracker, where it is visible.
+func bannedMarkers() []string {
+	return []string{"TODO", "FIXME", "XXX", "HACK"}
 }
 
 func runComments(pass *analysis.Pass) (any, error) {
@@ -103,7 +107,7 @@ func isDirective(group *ast.CommentGroup) bool {
 
 func reportMarkers(pass *analysis.Pass, group *ast.CommentGroup) {
 	for _, comment := range group.List {
-		for _, marker := range bannedMarkers {
+		for _, marker := range bannedMarkers() {
 			if !strings.Contains(comment.Text, marker) {
 				continue
 			}

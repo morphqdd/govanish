@@ -15,11 +15,13 @@ import (
 const maxParams = 4
 
 // ParamCount reports functions with unreadably long parameter lists.
-var ParamCount = &analysis.Analyzer{
-	Name:     "paramcount",
-	Doc:      fmt.Sprintf("functions may not take more than %d parameters", maxParams),
-	Requires: []*analysis.Analyzer{inspect.Analyzer},
-	Run:      runParamCount,
+func ParamCount() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name:     "paramcount",
+		Doc:      fmt.Sprintf("functions may not take more than %d parameters", maxParams),
+		Requires: []*analysis.Analyzer{inspect.Analyzer},
+		Run:      runParamCount,
+	}
 }
 
 func runParamCount(pass *analysis.Pass) (any, error) {

@@ -10,10 +10,12 @@ import (
 const maxFileLines = 400
 
 // FileLen reports source files that have grown past reading size.
-var FileLen = &analysis.Analyzer{
-	Name: "filelen",
-	Doc:  fmt.Sprintf("source files may not exceed %d lines", maxFileLines),
-	Run:  runFileLen,
+func FileLen() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name: "filelen",
+		Doc:  fmt.Sprintf("source files may not exceed %d lines", maxFileLines),
+		Run:  runFileLen,
+	}
 }
 
 func runFileLen(pass *analysis.Pass) (any, error) {

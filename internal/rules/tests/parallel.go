@@ -8,10 +8,12 @@ import (
 
 // Parallel reports tests that neither run in parallel nor hand their
 // *testing.T to a helper that might.
-var Parallel = &analysis.Analyzer{
-	Name: "testparallel",
-	Doc:  "tests must call t.Parallel",
-	Run:  runParallel,
+func Parallel() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name: "testparallel",
+		Doc:  "tests must call t.Parallel",
+		Run:  runParallel,
+	}
 }
 
 func runParallel(pass *analysis.Pass) (any, error) {

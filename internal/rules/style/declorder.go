@@ -12,29 +12,35 @@ import (
 // kind of general declaration.
 const rankFunc = 4
 
-// declRank orders the kinds of top-level declaration. A file reads from
-// the most constant thing in it to the most active.
-var declRank = map[token.Token]int{
-	token.IMPORT: 0,
-	token.CONST:  1,
-	token.VAR:    2,
-	token.TYPE:   3,
-}
-
-// rankName names a rank for a diagnostic.
-var rankName = map[int]string{
-	0: "import",
-	1: "const",
-	2: "var",
-	3: "type",
-	4: "func",
-}
-
 // DeclOrder reports top-level declarations that appear out of order.
-var DeclOrder = &analysis.Analyzer{
-	Name: "declorder",
-	Doc:  "declarations must be ordered const, var, type, then func",
-	Run:  runDeclOrder,
+func DeclOrder() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name: "declorder",
+		Doc:  "declarations must be ordered const, var, type, then func",
+		Run:  runDeclOrder,
+	}
+}
+
+// declRank() orders the kinds of top-level declaration. A file reads from
+// the most constant thing in it to the most active.
+func declRank() map[token.Token]int {
+	return map[token.Token]int{
+		token.IMPORT: 0,
+		token.CONST:  1,
+		token.VAR:    2,
+		token.TYPE:   3,
+	}
+}
+
+// rankName() names a rank for a diagnostic.
+func rankName() map[int]string {
+	return map[int]string{
+		0: "import",
+		1: "const",
+		2: "var",
+		3: "type",
+		4: "func",
+	}
 }
 
 func runDeclOrder(pass *analysis.Pass) (any, error) {
@@ -70,7 +76,7 @@ func checkDeclOrder(pass *analysis.Pass, file *ast.File) {
 		}
 
 		pass.Reportf(decl.Pos(), "%s declaration must come before %s declarations",
-			rankName[rank], rankName[highest])
+			rankName()[rank], rankName()[highest])
 	}
 }
 
@@ -107,5 +113,5 @@ func rankOf(decl ast.Decl) int {
 		return rankFunc
 	}
 
-	return declRank[gen.Tok]
+	return declRank()[gen.Tok]
 }

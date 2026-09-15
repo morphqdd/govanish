@@ -12,11 +12,13 @@ import (
 
 // NoElse reports an else branch whose if branch already ends in a return,
 // which is an early return written the long way round.
-var NoElse = &analysis.Analyzer{
-	Name:     "noelse",
-	Doc:      "an if branch ending in return must not be followed by else",
-	Requires: []*analysis.Analyzer{inspect.Analyzer},
-	Run:      runNoElse,
+func NoElse() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name:     "noelse",
+		Doc:      "an if branch ending in return must not be followed by else",
+		Requires: []*analysis.Analyzer{inspect.Analyzer},
+		Run:      runNoElse,
+	}
 }
 
 func runNoElse(pass *analysis.Pass) (any, error) {

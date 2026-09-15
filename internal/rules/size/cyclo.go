@@ -15,11 +15,13 @@ import (
 const maxComplexity = 8
 
 // Cyclo reports functions with too many branches to test exhaustively.
-var Cyclo = &analysis.Analyzer{
-	Name:     "cyclo",
-	Doc:      fmt.Sprintf("functions may not exceed a cyclomatic complexity of %d", maxComplexity),
-	Requires: []*analysis.Analyzer{inspect.Analyzer},
-	Run:      runCyclo,
+func Cyclo() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name:     "cyclo",
+		Doc:      fmt.Sprintf("functions may not exceed a cyclomatic complexity of %d", maxComplexity),
+		Requires: []*analysis.Analyzer{inspect.Analyzer},
+		Run:      runCyclo,
+	}
 }
 
 func runCyclo(pass *analysis.Pass) (any, error) {
@@ -61,26 +63,43 @@ func complexity(body *ast.BlockStmt) int {
 }
 
 // decisions reports how many independent paths a single node introduces.
-// A default clause introduces none: it is the path that remains.
 func decisions(node ast.Node) int {
 	switch typed := node.(type) {
 	case *ast.IfStmt, *ast.ForStmt, *ast.RangeStmt:
 		return 1
 	case *ast.CaseClause:
-		return countIf(len(typed.List) > 0)
+		return caseDecision(typed)
 	case *ast.CommClause:
-		return countIf(typed.Comm != nil)
+		return commDecision(typed)
 	case *ast.BinaryExpr:
-		return countIf(typed.Op == token.LAND || typed.Op == token.LOR)
+		return logicalDecision(typed)
 	default:
 		return 0
 	}
 }
 
-func countIf(condition bool) int {
-	if condition {
-		return 1
+// caseDecision counts a case clause. A default clause introduces no new
+// path: it is the path that remains.
+func caseDecision(clause *ast.CaseClause) int {
+	if len(clause.List) == 0 {
+		return 0
 	}
 
-	return 0
+	return 1
+}
+
+func commDecision(clause *ast.CommClause) int {
+	if clause.Comm == nil {
+		return 0
+	}
+
+	return 1
+}
+
+func logicalDecision(expr *ast.BinaryExpr) int {
+	if expr.Op != token.LAND && expr.Op != token.LOR {
+		return 0
+	}
+
+	return 1
 }

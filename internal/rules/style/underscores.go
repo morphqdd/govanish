@@ -10,17 +10,21 @@ import (
 	"govanish/internal/astutil"
 )
 
-// testPrefixes are the identifier prefixes Go's own testing conventions
-// require to carry an underscore.
-var testPrefixes = []string{"Test_", "Benchmark_", "Example_", "Fuzz_"}
-
 // Underscores reports identifiers spelled with underscores instead of the
 // camel case Go uses everywhere else.
-var Underscores = &analysis.Analyzer{
-	Name:     "underscores",
-	Doc:      "identifiers must be camel case, not underscore separated",
-	Requires: []*analysis.Analyzer{inspect.Analyzer},
-	Run:      runUnderscores,
+func Underscores() *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name:     "underscores",
+		Doc:      "identifiers must be camel case, not underscore separated",
+		Requires: []*analysis.Analyzer{inspect.Analyzer},
+		Run:      runUnderscores,
+	}
+}
+
+// testPrefixes are the identifier prefixes Go's own testing conventions
+// require to carry an underscore.
+func testPrefixes() []string {
+	return []string{"Test_", "Benchmark_", "Example_", "Fuzz_"}
 }
 
 func runUnderscores(pass *analysis.Pass) (any, error) {
@@ -66,7 +70,7 @@ func exemptName(name string) bool {
 		return true
 	}
 
-	for _, prefix := range testPrefixes {
+	for _, prefix := range testPrefixes() {
 		if strings.HasPrefix(name, prefix) {
 			return true
 		}
