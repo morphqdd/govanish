@@ -31,3 +31,9 @@ func TestBannedImports(t *testing.T) {
 
 	analysistest.Run(t, analysistest.TestData(), arch.BannedImports(), "bannedimports")
 }
+
+func TestNoShadow(t *testing.T) {
+	t.Parallel()
+
+	analysistest.Run(t, analysistest.TestData(), arch.NoShadow(), "noshadow")
+}

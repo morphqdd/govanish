@@ -79,3 +79,41 @@ func TestSetIsStableWithinItself(t *testing.T) {
 		}
 	}
 }
+
+// TestEveryRuleIsRegistered pins the full rule set by name. Without it a
+// rule can be dropped from the registry and every other test still
+// passes: the rule's own test keeps working, and the linter simply stops
+// enforcing it. That happened once.
+func TestEveryRuleIsRegistered(t *testing.T) {
+	t.Parallel()
+
+	want := []string{
+		"banned-imports", "comments-doc-only", "ctx-first", "ctx-origin",
+		"cyclomatic", "decl-order", "defer-unlock", "errcheck", "error-shape",
+		"errors-is", "exported-doc", "file-complexity", "file-len", "func-len",
+		"go-needs-owner", "import-groups", "initialisms", "keyed-literals",
+		"line-length", "nesting-depth", "no-any", "no-bool-param",
+		"no-else-after-return", "no-empty-err-branch", "no-globals", "no-init",
+		"no-naked-return", "no-panic", "no-shadow", "no-skip",
+		"no-time-after-select", "no-underscore-names", "param-count", "pkg-doc",
+		"return-count", "sized-chan", "struct-fields", "test-parallel",
+		"test-shape", "wrap",
+	}
+
+	got := make(map[string]bool)
+	for _, rule := range registry.New().Rules() {
+		got[rule.ID] = true
+	}
+
+	for _, id := range want {
+		t.Run(id, func(t *testing.T) {
+			if !got[id] {
+				t.Errorf("rule %q is not registered", id)
+			}
+		})
+	}
+
+	if len(got) != len(want) {
+		t.Errorf("registry has %d rules, want %d", len(got), len(want))
+	}
+}

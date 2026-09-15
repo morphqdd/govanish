@@ -14,3 +14,7 @@ func ServeHTTP() {}
 func Curler() {}
 
 func Idle() {}
+
+func parseUrl() {} // want `parseUrl should be parseURL`
+
+func urlParser() {}

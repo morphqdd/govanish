@@ -51,7 +51,7 @@ func runNoPanic(pass *analysis.Pass) (any, error) {
 }
 
 func reportFatal(pass *analysis.Pass, call *ast.CallExpr) {
-	if ident, ok := call.Fun.(*ast.Ident); ok && ident.Name == "panic" {
+	if ident, isIdent := call.Fun.(*ast.Ident); isIdent && ident.Name == "panic" {
 		pass.Reportf(call.Pos(), "panic is banned; return an error instead")
 
 		return

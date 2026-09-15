@@ -7,6 +7,7 @@ import (
 
 	"govanish/internal/rules/api"
 	"govanish/internal/rules/arch"
+	"govanish/internal/rules/conc"
 	"govanish/internal/rules/errs"
 	"govanish/internal/rules/size"
 	"govanish/internal/rules/style"
@@ -31,12 +32,35 @@ type Set struct {
 
 // New constructs every rule govanish runs.
 func New() Set {
-	return Set{rules: []Rule{
+	var rules []Rule
+
+	for _, group := range [][]Rule{
+		structureRules(),
+		sizeRules(),
+		styleRules(),
+		errorsRules(),
+		apiRules(),
+		concurrencyRules(),
+		testsRules(),
+	} {
+		rules = append(rules, group...)
+	}
+
+	return Set{rules: rules}
+}
+
+func structureRules() []Rule {
+	return []Rule{
 		{ID: "no-init", Analyzer: arch.NoInit()},
 		{ID: "no-globals", Analyzer: arch.NoGlobals()},
 		{ID: "no-any", Analyzer: arch.NoAny()},
 		{ID: "banned-imports", Analyzer: arch.BannedImports()},
+		{ID: "no-shadow", Analyzer: arch.NoShadow()},
+	}
+}
 
+func sizeRules() []Rule {
+	return []Rule{
 		{ID: "func-len", Analyzer: size.FuncLen()},
 		{ID: "file-len", Analyzer: size.FileLen()},
 		{ID: "line-length", Analyzer: size.LineLength()},
@@ -45,7 +69,12 @@ func New() Set {
 		{ID: "param-count", Analyzer: size.ParamCount()},
 		{ID: "return-count", Analyzer: size.ReturnCount()},
 		{ID: "struct-fields", Analyzer: size.StructFields()},
+		{ID: "file-complexity", Analyzer: size.FileComplexity()},
+	}
+}
 
+func styleRules() []Rule {
+	return []Rule{
 		{ID: "no-else-after-return", Analyzer: style.NoElse()},
 		{ID: "no-naked-return", Analyzer: style.NoNakedReturn()},
 		{ID: "no-underscore-names", Analyzer: style.Underscores()},
@@ -53,23 +82,46 @@ func New() Set {
 		{ID: "comments-doc-only", Analyzer: style.Comments()},
 		{ID: "decl-order", Analyzer: style.DeclOrder()},
 		{ID: "import-groups", Analyzer: style.ImportGroups()},
+	}
+}
 
+func errorsRules() []Rule {
+	return []Rule{
 		{ID: "errcheck", Analyzer: errs.ErrCheck()},
 		{ID: "no-empty-err-branch", Analyzer: errs.EmptyBranch()},
 		{ID: "errors-is", Analyzer: errs.ErrorsIs()},
 		{ID: "no-panic", Analyzer: errs.NoPanic()},
 		{ID: "error-shape", Analyzer: errs.ErrShape()},
 		{ID: "wrap", Analyzer: errs.Wrap()},
+	}
+}
 
+func apiRules() []Rule {
+	return []Rule{
 		{ID: "no-bool-param", Analyzer: api.NoBoolParam()},
 		{ID: "keyed-literals", Analyzer: api.KeyedLiterals()},
+	}
+}
 
+func concurrencyRules() []Rule {
+	return []Rule{
+		{ID: "ctx-first", Analyzer: conc.CtxFirst()},
+		{ID: "ctx-origin", Analyzer: conc.CtxOrigin()},
+		{ID: "defer-unlock", Analyzer: conc.DeferUnlock()},
+		{ID: "sized-chan", Analyzer: conc.SizedChan()},
+		{ID: "go-needs-owner", Analyzer: conc.GoOwner()},
+		{ID: "no-time-after-select", Analyzer: conc.TimeAfter()},
+	}
+}
+
+func testsRules() []Rule {
+	return []Rule{
 		{ID: "test-shape", Analyzer: tests.Shape()},
 		{ID: "no-skip", Analyzer: tests.NoSkip()},
 		{ID: "test-parallel", Analyzer: tests.Parallel()},
 		{ID: "pkg-doc", Analyzer: tests.PkgDoc()},
 		{ID: "exported-doc", Analyzer: tests.ExportedDoc()},
-	}}
+	}
 }
 
 // Rules returns every rule in the set.

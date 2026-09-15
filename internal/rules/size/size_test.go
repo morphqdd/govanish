@@ -24,3 +24,5 @@ func TestNesting(t *testing.T)      { run(t, size.Nesting(), "nesting") }
 func TestParamCount(t *testing.T)   { run(t, size.ParamCount(), "paramcount") }
 func TestReturnCount(t *testing.T)  { run(t, size.ReturnCount(), "returncount") }
 func TestStructFields(t *testing.T) { run(t, size.StructFields(), "structfields") }
+
+func TestFileComplexity(t *testing.T) { run(t, size.FileComplexity(), "filecomplexity") }

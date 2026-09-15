@@ -83,7 +83,7 @@ func rangesOverCases(body *ast.BlockStmt) bool {
 }
 
 func isCaseTable(expr ast.Expr, literals map[string]bool) bool {
-	if _, ok := expr.(*ast.CompositeLit); ok {
+	if _, isLiteral := expr.(*ast.CompositeLit); isLiteral {
 		return true
 	}
 

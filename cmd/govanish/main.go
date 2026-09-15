@@ -76,8 +76,8 @@ func lint(opts options) int {
 		return fail(opts.errOut, err)
 	}
 
-	if err := render(opts.out, findings); err != nil {
-		return fail(opts.errOut, err)
+	if renderErr := render(opts.out, findings); renderErr != nil {
+		return fail(opts.errOut, renderErr)
 	}
 
 	if len(findings) > 0 {

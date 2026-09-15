@@ -1,20 +1,10 @@
 package style
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
-	"strconv"
-	"strings"
 
 	"golang.org/x/tools/go/analysis"
-)
-
-// The three groups an import may belong to, in the order they must appear.
-const (
-	groupStdlib = iota
-	groupExternal
-	groupLocal
 )
 
 // ImportGroups reports imports that are not arranged as exactly three
@@ -27,15 +17,6 @@ func ImportGroups() *analysis.Analyzer {
 	}
 }
 
-// groupNames() names a group for a diagnostic.
-func groupNames() map[int]string {
-	return map[int]string{
-		groupStdlib:   "standard library",
-		groupExternal: "external",
-		groupLocal:    "local",
-	}
-}
-
 func runImportGroups(pass *analysis.Pass) (any, error) {
 	prefix := localPrefix(pass)
 
@@ -44,24 +25,6 @@ func runImportGroups(pass *analysis.Pass) (any, error) {
 	}
 
 	return nil, nil
-}
-
-// localPrefix is the import path prefix that marks a package as belonging
-// to the code under analysis rather than to a dependency.
-func localPrefix(pass *analysis.Pass) string {
-	if pass.Module != nil && pass.Module.Path != "" {
-		return pass.Module.Path
-	}
-
-	return firstSegment(pass.Pkg.Path())
-}
-
-func firstSegment(path string) string {
-	if index := strings.Index(path, "/"); index >= 0 {
-		return path[:index]
-	}
-
-	return path
 }
 
 func checkImports(pass *analysis.Pass, file *ast.File, prefix string) {
@@ -167,25 +130,4 @@ func reportSpec(pass *analysis.Pass, spec *ast.ImportSpec) {
 			pass.Reportf(spec.Pos(), "blank imports are banned outside package main")
 		}
 	}
-}
-
-func groupOf(path, prefix string) int {
-	if prefix != "" && (path == prefix || strings.HasPrefix(path, prefix+"/")) {
-		return groupLocal
-	}
-
-	if strings.Contains(firstSegment(path), ".") {
-		return groupExternal
-	}
-
-	return groupStdlib
-}
-
-func importPath(spec *ast.ImportSpec) string {
-	path, err := strconv.Unquote(spec.Path.Value)
-	if err != nil {
-		return fmt.Sprintf("%v", spec.Path.Value)
-	}
-
-	return path
 }

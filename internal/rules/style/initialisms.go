@@ -11,6 +11,16 @@ import (
 	"govanish/internal/astutil"
 )
 
+// The two visibilities an identifier can have.
+const (
+	unexported visibility = iota
+	exported
+)
+
+// visibility says whether an identifier is part of a package's exported
+// surface. It is a named type because govanish bans boolean parameters.
+type visibility int
+
 // Initialisms reports identifiers that spell a known initialism in mixed
 // case, such as ParseUrl instead of ParseURL.
 func Initialisms() *analysis.Analyzer {
@@ -37,6 +47,14 @@ func initialisms() map[string]bool {
 	}
 }
 
+func visibilityOf(ident *ast.Ident) visibility {
+	if ident.IsExported() {
+		return exported
+	}
+
+	return unexported
+}
+
 func runInitialisms(pass *analysis.Pass) (any, error) {
 	insp, err := astutil.Inspector(pass)
 	if err != nil {
@@ -51,7 +69,7 @@ func runInitialisms(pass *analysis.Pass) (any, error) {
 			return
 		}
 
-		fixed := correctInitialisms(ident.Name)
+		fixed := correctInitialisms(ident.Name, visibilityOf(ident))
 		if fixed == ident.Name {
 			return
 		}
@@ -75,11 +93,16 @@ func packageIdents(pass *analysis.Pass) map[*ast.Ident]bool {
 }
 
 // correctInitialisms returns the identifier with every word that names an
-// initialism capitalized in full.
-func correctInitialisms(name string) string {
+// initialism capitalized in full. The first word of an unexported
+// identifier is left alone: Go writes urlParser, not URLParser.
+func correctInitialisms(name string, kind visibility) string {
 	words := splitWords(name)
 
 	for index, word := range words {
+		if index == 0 && kind == unexported {
+			continue
+		}
+
 		upper := strings.ToUpper(word)
 		if initialisms()[upper] {
 			words[index] = upper
