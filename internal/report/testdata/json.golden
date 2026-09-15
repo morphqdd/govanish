@@ -1,0 +1,29 @@
+[
+  {
+    "file": "internal/user/service.go",
+    "line": 12,
+    "col": 1,
+    "end_line": 12,
+    "end_col": 10,
+    "rule": "no-init",
+    "message": "func init is banned"
+  },
+  {
+    "file": "internal/user/service.go",
+    "line": 42,
+    "col": 6,
+    "end_line": 42,
+    "end_col": 16,
+    "rule": "func-len",
+    "message": "function CreateUser is 61 lines, limit is 40"
+  },
+  {
+    "file": "internal/user/service.go",
+    "line": 42,
+    "col": 6,
+    "end_line": 42,
+    "end_col": 16,
+    "rule": "no-bare-prim",
+    "message": "parameter name is a bare string"
+  }
+]
