@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
+	"govanish/internal/runner"
 )
 
-const fixtureDir = "../../internal/runner/testdata/fixture"
+const fixtureDir = runner.Dir("../../internal/runner/testdata/fixture")
 
 func TestRunCleanPackageExitsZero(t *testing.T) {
 	t.Parallel()

@@ -14,6 +14,7 @@ import (
 
 	"govanish/internal/registry"
 	"govanish/internal/report"
+	"govanish/internal/wholeprogram"
 )
 
 const loadMode = packages.NeedName |
@@ -26,14 +27,13 @@ const loadMode = packages.NeedName |
 	packages.NeedImports |
 	packages.NeedModule
 
-// ErrNoPackages reports that the given patterns matched nothing.
-func ErrNoPackages() error {
-	return errors.New("no packages matched the given patterns")
-}
+// Dir is the directory package patterns are resolved against. It is a
+// named type because govanish bans bare strings in exported signatures.
+type Dir string
 
 // Run lints the packages matching patterns, resolved relative to dir, and
 // returns their findings in printing order.
-func Run(dir string, patterns []string) ([]report.Finding, error) {
+func Run(dir Dir, patterns []string) ([]report.Finding, error) {
 	pkgs, err := load(dir, patterns)
 	if err != nil {
 		return nil, err
@@ -51,13 +51,20 @@ func Run(dir string, patterns []string) ([]report.Finding, error) {
 		return nil, err
 	}
 
+	findings = append(findings, wholeprogram.MinExport(pkgs)...)
+
 	report.Sort(findings)
 
 	return deduplicate(findings), nil
 }
 
-func load(dir string, patterns []string) ([]*packages.Package, error) {
-	config := &packages.Config{Dir: dir, Mode: loadMode, Tests: true}
+// errNoPackages reports that the given patterns matched nothing.
+func errNoPackages() error {
+	return errors.New("no packages matched the given patterns")
+}
+
+func load(dir Dir, patterns []string) ([]*packages.Package, error) {
+	config := &packages.Config{Dir: string(dir), Mode: loadMode, Tests: true}
 
 	pkgs, err := packages.Load(config, patterns...)
 	if err != nil {
@@ -65,7 +72,7 @@ func load(dir string, patterns []string) ([]*packages.Package, error) {
 	}
 
 	if len(pkgs) == 0 {
-		return nil, ErrNoPackages()
+		return nil, errNoPackages()
 	}
 
 	if packages.PrintErrors(pkgs) > 0 {
@@ -139,7 +146,7 @@ func finding(
 		Col:     position.Column,
 		EndLine: end.Line,
 		EndCol:  end.Column,
-		Rule:    set.IDOf(action.Analyzer),
+		Rule:    string(set.IDOf(action.Analyzer)),
 		Message: diagnostic.Message,
 	}
 }

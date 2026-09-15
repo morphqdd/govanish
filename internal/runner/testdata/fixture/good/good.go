@@ -1,8 +1,9 @@
 // Package good conforms to every rule, so that the command's clean-run
-// test stays clean as rules are added.
+// test stays clean as rules are added. It exports nothing: min-export
+// reports an export that no other package consumes, and this fixture has
+// no consumers.
 package good
 
-// Answer is documented, because every exported thing must be.
-func Answer() int {
+func answer() int {
 	return 42
 }

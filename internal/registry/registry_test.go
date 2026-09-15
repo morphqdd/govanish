@@ -20,7 +20,7 @@ func TestAllRulesAreValid(t *testing.T) {
 func TestRuleIdentifiersAreUnique(t *testing.T) {
 	t.Parallel()
 
-	seen := make(map[string]bool)
+	seen := make(map[registry.RuleID]bool)
 	for _, rule := range registry.New().Rules() {
 		if seen[rule.ID] {
 			t.Errorf("duplicate rule id %q", rule.ID)
@@ -87,26 +87,27 @@ func TestSetIsStableWithinItself(t *testing.T) {
 func TestEveryRuleIsRegistered(t *testing.T) {
 	t.Parallel()
 
-	want := []string{
+	want := []registry.RuleID{
 		"banned-imports", "comments-doc-only", "ctx-first", "ctx-origin",
 		"cyclomatic", "decl-order", "defer-unlock", "errcheck", "error-shape",
 		"errors-is", "exported-doc", "file-complexity", "file-len", "func-len",
 		"go-needs-owner", "import-groups", "initialisms", "keyed-literals",
 		"line-length", "nesting-depth", "no-any", "no-bool-param",
-		"no-else-after-return", "no-empty-err-branch", "no-globals", "no-init",
+		"no-bare-prim", "no-else-after-return", "no-empty-err-branch",
+		"no-globals", "no-iface-return", "no-init",
 		"no-naked-return", "no-panic", "no-shadow", "no-skip",
 		"no-time-after-select", "no-underscore-names", "param-count", "pkg-doc",
 		"return-count", "sized-chan", "struct-fields", "test-parallel",
 		"test-shape", "wrap",
 	}
 
-	got := make(map[string]bool)
+	got := make(map[registry.RuleID]bool)
 	for _, rule := range registry.New().Rules() {
 		got[rule.ID] = true
 	}
 
 	for _, id := range want {
-		t.Run(id, func(t *testing.T) {
+		t.Run(string(id), func(t *testing.T) {
 			if !got[id] {
 				t.Errorf("rule %q is not registered", id)
 			}

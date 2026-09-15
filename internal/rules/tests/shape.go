@@ -2,6 +2,7 @@ package tests
 
 import (
 	"go/ast"
+	"go/types"
 	"strings"
 
 	"golang.org/x/tools/go/analysis"
@@ -56,7 +57,7 @@ func checkShape(pass *analysis.Pass, decl ast.Decl) {
 // checkSubtests reports a test that loops over cases without giving each
 // case its own subtest, which makes a failure name the case that failed.
 func checkSubtests(pass *analysis.Pass, fn *ast.FuncDecl, receiver string) {
-	if !rangesOverCases(fn.Body) || calls(fn.Body, receiver, "Run") {
+	if !rangesOverCases(pass, fn.Body) || calls(fn.Body, receiver, "Run") {
 		return
 	}
 
@@ -66,13 +67,13 @@ func checkSubtests(pass *analysis.Pass, fn *ast.FuncDecl, receiver string) {
 // rangesOverCases reports whether the body loops over cases written out
 // in the test itself. Looping over something a function returned is
 // ordinary iteration, not a table, so it needs no subtests.
-func rangesOverCases(body *ast.BlockStmt) bool {
-	literals := literalNames(body)
+func rangesOverCases(pass *analysis.Pass, body *ast.BlockStmt) bool {
+	literals := literalNames(pass, body)
 	found := false
 
 	ast.Inspect(body, func(node ast.Node) bool {
 		stmt, ok := node.(*ast.RangeStmt)
-		if ok && isCaseTable(stmt.X, literals) {
+		if ok && isCaseTable(pass, stmt.X, literals) {
 			found = true
 		}
 
@@ -82,8 +83,8 @@ func rangesOverCases(body *ast.BlockStmt) bool {
 	return found
 }
 
-func isCaseTable(expr ast.Expr, literals map[string]bool) bool {
-	if _, isLiteral := expr.(*ast.CompositeLit); isLiteral {
+func isCaseTable(pass *analysis.Pass, expr ast.Expr, literals map[string]bool) bool {
+	if isCaseSlice(pass, expr) {
 		return true
 	}
 
@@ -92,9 +93,32 @@ func isCaseTable(expr ast.Expr, literals map[string]bool) bool {
 	return ok && literals[ident.Name]
 }
 
+// isCaseSlice reports whether the expression is a slice of structs
+// written out in place, which is the shape of a test table. A map or a
+// slice of plain values is an expectation, not a table of cases.
+func isCaseSlice(pass *analysis.Pass, expr ast.Expr) bool {
+	if _, isLiteral := expr.(*ast.CompositeLit); !isLiteral {
+		return false
+	}
+
+	typ := pass.TypesInfo.TypeOf(expr)
+	if typ == nil {
+		return false
+	}
+
+	slice, ok := typ.Underlying().(*types.Slice)
+	if !ok {
+		return false
+	}
+
+	_, isStruct := slice.Elem().Underlying().(*types.Struct)
+
+	return isStruct
+}
+
 // literalNames collects the variables the body assigns a composite
 // literal, which is how a table of cases is usually written.
-func literalNames(body *ast.BlockStmt) map[string]bool {
+func literalNames(pass *analysis.Pass, body *ast.BlockStmt) map[string]bool {
 	names := make(map[string]bool)
 
 	ast.Inspect(body, func(node ast.Node) bool {
@@ -104,7 +128,7 @@ func literalNames(body *ast.BlockStmt) map[string]bool {
 		}
 
 		for index, value := range assign.Rhs {
-			if _, isLiteral := value.(*ast.CompositeLit); !isLiteral {
+			if !isCaseSlice(pass, value) {
 				continue
 			}
 

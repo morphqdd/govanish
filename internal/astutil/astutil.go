@@ -13,36 +13,28 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
-// ErrMissingInspector reports that the driver did not supply the shared
-// inspector, which means the analyzer ran without declaring inspect in
-// its Requires.
-func ErrMissingInspector() error {
-	return errors.New("inspect analyzer result missing")
-}
+// Description is how a diagnostic refers to a declaration. It is a named
+// type because govanish bans bare strings in exported signatures.
+type Description string
 
 // Inspector returns the shared inspector for the package under analysis.
 func Inspector(pass *analysis.Pass) (*inspector.Inspector, error) {
 	insp, ok := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	if !ok {
-		return nil, ErrMissingInspector()
+		return nil, errMissingInspector()
 	}
 
 	return insp, nil
 }
 
 // Describe names a function declaration the way a diagnostic should refer
-// to it: "function Parse" or "method Thing.Parse".
-func Describe(decl *ast.FuncDecl) string {
+// to it: "function Parse" or "method Parse".
+func Describe(decl *ast.FuncDecl) Description {
 	if decl.Recv == nil {
-		return "function " + decl.Name.Name
+		return Description("function " + decl.Name.Name)
 	}
 
-	return "method " + decl.Name.Name
-}
-
-// ErrorType is the predeclared error interface.
-func ErrorType() types.Type {
-	return types.Universe.Lookup("error").Type()
+	return Description("method " + decl.Name.Name)
 }
 
 // IsError reports whether a type is exactly the predeclared error
@@ -52,7 +44,7 @@ func IsError(typ types.Type) bool {
 		return false
 	}
 
-	return types.Identical(typ, ErrorType())
+	return types.Identical(typ, errorType())
 }
 
 // ResultTypes returns the result types of whatever a call expression
@@ -74,4 +66,16 @@ func ResultTypes(info *types.Info, call *ast.CallExpr) []types.Type {
 	}
 
 	return results
+}
+
+// errMissingInspector reports that the driver did not supply the shared
+// inspector, which means the analyzer ran without declaring inspect in
+// its Requires.
+func errMissingInspector() error {
+	return errors.New("inspect analyzer result missing")
+}
+
+// errorType is the predeclared error interface.
+func errorType() types.Type {
+	return types.Universe.Lookup("error").Type()
 }

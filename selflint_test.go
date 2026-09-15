@@ -14,7 +14,7 @@ import (
 func TestSelfLint(t *testing.T) {
 	t.Parallel()
 
-	findings, err := runner.Run(".", []string{"./cmd/...", "./internal/..."})
+	findings, err := runner.Run(runner.Dir("."), []string{"./cmd/...", "./internal/..."})
 	if err != nil {
 		t.Fatalf("lint own source: %v", err)
 	}

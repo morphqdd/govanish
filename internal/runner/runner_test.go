@@ -8,7 +8,7 @@ import (
 	"govanish/internal/runner"
 )
 
-const fixtureDir = "testdata/fixture"
+const fixtureDir = runner.Dir("testdata/fixture")
 
 // TestRunReportsViolations asserts on the rule under test rather than on
 // the total number of findings, which grows with the rule set. Requiring

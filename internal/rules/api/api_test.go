@@ -18,3 +18,6 @@ func run(t *testing.T, analyzer *analysis.Analyzer, pkg string) {
 
 func TestNoBoolParam(t *testing.T)   { run(t, api.NoBoolParam(), "noboolparam") }
 func TestKeyedLiterals(t *testing.T) { run(t, api.KeyedLiterals(), "keyedliterals") }
+
+func TestNoIfaceReturn(t *testing.T) { run(t, api.NoIfaceReturn(), "noifacereturn") }
+func TestNoBarePrim(t *testing.T)    { run(t, api.NoBarePrim(), "nobareprim") }

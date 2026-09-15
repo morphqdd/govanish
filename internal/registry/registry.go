@@ -18,9 +18,12 @@ import (
 // The two differ because analysis.Validate requires analyzer names to be
 // valid Go identifiers, while diagnostics read better hyphenated.
 type Rule struct {
-	ID       string
+	ID       RuleID
 	Analyzer *analysis.Analyzer
 }
+
+// RuleID is the identifier govanish prints for a rule.
+type RuleID string
 
 // Set is one construction of every rule. Analyzers are compared by
 // pointer by the analysis driver, so a Set must be built once and then
@@ -99,6 +102,8 @@ func errorsRules() []Rule {
 func apiRules() []Rule {
 	return []Rule{
 		{ID: "no-bool-param", Analyzer: api.NoBoolParam()},
+		{ID: "no-iface-return", Analyzer: api.NoIfaceReturn()},
+		{ID: "no-bare-prim", Analyzer: api.NoBarePrim()},
 		{ID: "keyed-literals", Analyzer: api.KeyedLiterals()},
 	}
 }
@@ -144,12 +149,12 @@ func (s Set) Analyzers() []*analysis.Analyzer {
 
 // IDOf returns the printable identifier of an analyzer in this set, or
 // the analyzer's own name if it belongs to another set.
-func (s Set) IDOf(target *analysis.Analyzer) string {
+func (s Set) IDOf(target *analysis.Analyzer) RuleID {
 	for _, rule := range s.rules {
 		if rule.Analyzer == target {
 			return rule.ID
 		}
 	}
 
-	return target.Name
+	return RuleID(target.Name)
 }

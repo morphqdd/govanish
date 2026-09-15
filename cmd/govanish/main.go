@@ -28,7 +28,7 @@ const version = "dev"
 type options struct {
 	format   string
 	patterns []string
-	dir      string
+	dir      runner.Dir
 	out      io.Writer
 	errOut   io.Writer
 }
@@ -37,7 +37,7 @@ func main() {
 	os.Exit(run(os.Args[1:], "", os.Stdout, os.Stderr))
 }
 
-func run(args []string, dir string, out, errOut io.Writer) int {
+func run(args []string, dir runner.Dir, out, errOut io.Writer) int {
 	flags := flag.NewFlagSet("govanish", flag.ContinueOnError)
 	flags.SetOutput(errOut)
 
