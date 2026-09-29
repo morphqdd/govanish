@@ -13,14 +13,26 @@ import (
 func load(t *testing.T) []*packages.Package {
 	t.Helper()
 
-	mode := packages.NeedName | packages.NeedFiles | packages.NeedSyntax |
+	return loadConfig(t, packages.Config{})
+}
+
+// loadWithTests loads the fixture the way the runner does, so a package
+// with in-package tests arrives twice: plain and test-augmented.
+func loadWithTests(t *testing.T) []*packages.Package {
+	t.Helper()
+
+	return loadConfig(t, packages.Config{Tests: true})
+}
+
+func loadConfig(t *testing.T, config packages.Config) []*packages.Package {
+	t.Helper()
+
+	config.Dir = "testdata/fixture"
+	config.Mode = packages.NeedName | packages.NeedFiles | packages.NeedSyntax |
 		packages.NeedTypes | packages.NeedTypesInfo | packages.NeedDeps |
 		packages.NeedImports
 
-	pkgs, err := packages.Load(&packages.Config{
-		Dir:  "testdata/fixture",
-		Mode: mode,
-	}, "./...")
+	pkgs, err := packages.Load(&config, "./...")
 	if err != nil {
 		t.Fatalf("load fixture: %v", err)
 	}
@@ -59,5 +71,26 @@ func TestMinExportFindsOrphans(t *testing.T) {
 
 	for name := range wants {
 		t.Errorf("did not report %q, which nothing uses", name)
+	}
+}
+
+// TestMinExportCountsTestVariants checks that a use from another package
+// still counts when the used package also has a test-augmented variant,
+// whose objects are distinct from the ones the importer references.
+func TestMinExportCountsTestVariants(t *testing.T) {
+	t.Parallel()
+
+	reportedOrphan := false
+
+	for _, name := range names(wholeprogram.MinExport(loadWithTests(t))) {
+		if name == "Consumed" {
+			t.Errorf("reported %q, which another package uses", name)
+		}
+
+		reportedOrphan = reportedOrphan || name == "Orphan"
+	}
+
+	if !reportedOrphan {
+		t.Error(`did not report "Orphan", which nothing uses`)
 	}
 }

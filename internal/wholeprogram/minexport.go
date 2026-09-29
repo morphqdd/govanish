@@ -42,8 +42,8 @@ func skipPackage(pkg *packages.Package) bool {
 
 // usedObjects collects every object each package references from a
 // package other than its own.
-func usedObjects(pkgs []*packages.Package) map[types.Object]bool {
-	used := make(map[types.Object]bool)
+func usedObjects(pkgs []*packages.Package) usage {
+	used := make(usage)
 
 	for _, pkg := range pkgs {
 		if pkg.TypesInfo == nil {
@@ -55,8 +55,8 @@ func usedObjects(pkgs []*packages.Package) map[types.Object]bool {
 				continue
 			}
 
-			if object.Pkg() != pkg.Types {
-				used[object] = true
+			if object.Pkg().Path() != pkg.Types.Path() {
+				used.mark(object)
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func usedObjects(pkgs []*packages.Package) map[types.Object]bool {
 // expandSignatures marks the types named in the signature of anything
 // used from outside. A type returned by an exported function is part of
 // the surface even when no caller writes its name.
-func expandSignatures(pkgs []*packages.Package, used map[types.Object]bool) {
+func expandSignatures(pkgs []*packages.Package, used usage) {
 	for _, pkg := range pkgs {
 		if pkg.Types == nil {
 			continue
@@ -77,14 +77,14 @@ func expandSignatures(pkgs []*packages.Package, used map[types.Object]bool) {
 
 		for _, name := range scope.Names() {
 			object := scope.Lookup(name)
-			if used[object] {
+			if used.has(object) {
 				markNamedTypes(object.Type(), used)
 			}
 		}
 	}
 }
 
-func markNamedTypes(typ types.Type, used map[types.Object]bool) {
+func markNamedTypes(typ types.Type, used usage) {
 	if named, isNamed := typ.(*types.Named); isNamed {
 		markMethods(named, used)
 
@@ -105,16 +105,16 @@ func markNamedTypes(typ types.Type, used map[types.Object]bool) {
 
 // markMethods marks everything the methods of a used type mention. A
 // type reachable only as a method result is still part of the surface.
-func markMethods(named *types.Named, used map[types.Object]bool) {
+func markMethods(named *types.Named, used usage) {
 	for index := range named.NumMethods() {
 		markNamedTypes(named.Method(index).Type(), used)
 	}
 }
 
-func markNamed(typ types.Type, used map[types.Object]bool) {
+func markNamed(typ types.Type, used usage) {
 	switch typed := typ.(type) {
 	case *types.Named:
-		used[typed.Obj()] = true
+		used.mark(typed.Obj())
 	case *types.Slice:
 		markNamed(typed.Elem(), used)
 	case *types.Pointer:
@@ -122,14 +122,14 @@ func markNamed(typ types.Type, used map[types.Object]bool) {
 	}
 }
 
-func orphanExports(pkg *packages.Package, used map[types.Object]bool) []report.Finding {
+func orphanExports(pkg *packages.Package, used usage) []report.Finding {
 	var findings []report.Finding
 
 	scope := pkg.Types.Scope()
 
 	for _, name := range scope.Names() {
 		object := scope.Lookup(name)
-		if !object.Exported() || used[object] {
+		if !object.Exported() || used.has(object) {
 			continue
 		}
 
